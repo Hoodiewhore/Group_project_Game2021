@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="//cdn.jsdelivr.net/npm/phaser@3.24.1/dist/phaser.min.js"></script>
+        <script src="scene-one.js"></script>
+        <script src="scene-two.js"></script>
+          <script src="scene-three.js"></script>
+            <script src="scene-four.js"></script>
+    </head>
+    <body>
+        <div id="game"></div>
+        <script>
+
+            const phaserConfig = {
+              type: Phaser.AUTO,
+              parent: "game",
+              width: 800,
+              height: 600,
+              physics: {
+                  default: 'arcade',
+                  arcade: {
+                      gravity: { y: 300, x:0 },
+                      debug: false
+                  }
+              },
+              backgroundColor: "#5DACD8",
+              scene: [ SceneThree, SceneOne, SceneTwo, SceneFour]
+            };
+            var player;
+
+            var platforms;
+            var cursors;
+            var dash = true
+            var checktime;
+            function collectStar (player, star)
+            {
+                star.disableBody(true, true);
+
+
+
+                   this.cameras.main.fade()
+                   this.cameras.main.once('camerafadeoutcomplete', function (camera) {
+                     this.scene.start("SceneThree", {
+                       "message": "Game Over"
+             });
+                  alert("GZ du vant")
+
+                }, this);
+
+            }
+            function enemyhit (player, enemy)
+            {
+              this.physics.pause();
+
+              player.setTint(0xff0000);
+
+              player.anims.play('turn');
+
+              gameOver = true;
+
+            }
+
+            function collide (block, player,defGravity) {
+              if(player.flipY === true){return}
+              else if (player.flipY === false && block.body.touching.up === false ){return}
+               else if (block.body.moves && block.body.touching.up && player.body.touching.down) {
+                if(cursors.up.isDown){ player.setGravityY(0);}
+                else{  player.setGravityY(10000);}
+                return
+              }
+
+
+            }
+
+
+
+            function gravityrush(check){
+              check.input.keyboard.on('keydown_W', function (event) {
+                    //  if(player.body.touching.down){
+                        this.defGravity = -600
+                    player.setGravityY(this.defGravity)
+                    player.setGravityX(0)
+
+
+                 // W key down
+                // player.flipX = true;
+                 player.angle = 180
+                 player.flipX = true;
+          //  }
+            });
+            check.input.keyboard.on('keydown_S', function (event) {//kun keydown for bare generelt
+              //if(player.body.touching.up){
+                this.defGravity = 0.001
+              player.setGravityY(this.defGravity)
+              player.setGravityX(0)
+
+            // W key down
+          //  player.flipX = false
+            player.angle = 0
+          //  }
+
+            })
+            check.input.keyboard.on('keydown_A', function (event) {//kun keydown for bare generelt
+
+                this.defGravity = 0
+                player.angle = 90
+              player.setGravityY(-300)
+              player.setGravityX(-20000)
+            // W key down
+            //player.flipY = false;
+
+
+            })
+            check.input.keyboard.on('keydown_D', function (event) {//kun keydown for bare generelt
+
+                this.defGravity = 0
+                player.angle = -90
+              player.setGravityY(-300)
+              player.setGravityX(20000)
+            // W key down
+            //player.flipY = false;
+
+
+            })
+
+
+            }
+
+            function controlscheme(time){
+              speed = 320
+              if(checktime < time){
+               dash = true
+               scoreText.setText('Dash: ' + dash);
+             }
+          /*   if(dash === false){
+               speed = 640
+             }
+             else{speed = 320}*/
+
+             if(cursors.space.isDown && dash === true)
+             {
+               dash = false
+               checktime = time + 2000
+               scoreText.setText('Dash: ' + dash);
+               if(cursors.right.isDown){
+                 //player.x = player.x -50
+                 player.setVelocityX(4000)
+               }
+               else if(cursors.left.isDown ){
+               //  player.x = player.x +50
+                 player.setVelocityX(-4000)
+               }
+
+
+
+
+             //  player.reset(player.x+5, player.y)
+                 player.anims.play('space');
+             }
+             else if(cursors.up.isDown&&(player.angle === -90|| player.angle ===90) /*&&(player.body.touching.right || player.body.touching.left)*/ )
+             { player.anims.play('right', true)
+              player.setVelocityY(-speed);
+              player.setVelocityX(0);
+              if(player.angle === -90){
+              player.flipX = false}
+              else{player.flipX = true}
+              }
+              else if (cursors.down.isDown &&(player.angle === -90|| player.angle ===90) /*&&(player.body.touching.right || player.body.touching.left)*/)
+              {
+                player.setVelocityY(speed)
+                player.setVelocityX(0);
+                player.anims.play('right',true)
+                if(player.angle === -90){
+                player.flipX = true}
+                else{player.flipX = false} }
+
+             else if (cursors.left.isDown && (player.angle === 0|| player.angle === -180))
+               {
+                   player.setVelocityX(-speed);
+                  //   player.setVelocityY(0)
+
+                   if(dash === false){player.anims.play('dashed-side', true);}
+
+                   else{player.anims.play('right', true);}
+                   if(player.angle === 0){player.flipX = true;}
+                  else if (player.angle === -180){player.flipX = false}
+                    // flip the sprite to the left
+               }
+               else if (cursors.right.isDown && (player.angle === 0|| player.angle === -180))
+               {
+
+                   player.setVelocityX(speed);
+                   //player.setVelocityY(0)
+                   if(dash === false){player.anims.play('dashed-side', true);}
+                   else{player.anims.play('right', true);}
+                   if(player.angle === 0){player.flipX = false;} // flip the sprite to the left
+                   else if (player.angle === -180){player.flipX = true}
+               }
+               else if(player.angle === 90 || player.angle === -90){
+                 player.setVelocityY(0)
+                 player.setVelocityX(0);
+                 player.anims.play('turn')
+               }
+               else
+               {
+                   player.setVelocityX(0);
+
+                   if( dash === false){player.anims.play('dashed');}
+                   else {player.anims.play('turn')
+
+
+
+                   ;}
+
+               }
+
+
+               if (cursors.up.isDown && player.body.touching.down && (player.angle === 0|| player.angle === -180))
+               {
+
+
+                   player.setVelocityY(-150);
+
+
+               }
+                else if(cursors.up.isDown && player.body.touching.up && (player.angle === 0|| player.angle === -180)){
+
+                   player.setVelocityY(150);
+
+               }
+
+            /*   if( player.angle === 90 || player.angle === -90){
+
+                if(cursors.right.isDown){
+                  player.setVelocityY(-150);
+                   player.anims.play('testright', true);
+
+
+
+                  }
+                  else if (cursors.down.isDown){
+                    player.setVelocityY(150)
+                    player.anims.play('turn')}
+                    else {player.setVelocityY(0);
+
+              }}*/
+
+
+
+
+            }
+
+            const game = new Phaser.Game(phaserConfig);
+
+        </script>
+    </body>
